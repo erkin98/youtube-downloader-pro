@@ -1,0 +1,15 @@
+{
+  "default_settings": {
+    "output_dir": "downloads",
+    "resolution": "1080",
+    "format": "mp4",
+    "audio_format": "mp3",
+    "max_workers": 4,
+    "subtitle_langs": ["en"]
+  },
+  "advanced_options": {
+    "retry_attempts": 3,
+    "rate_limit": null,
+    "proxy": null
+  }
+}

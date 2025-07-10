@@ -1,0 +1,12 @@
+# Sample batch file for YouTube Downloader Pro
+# Lines starting with # are comments and will be ignored
+# One URL per line
+
+# Playlist example:
+# https://www.youtube.com/playlist?list=PLFAoLYoZ_IxY3mMaG0X9OrvJFyVHSOZRn
+
+# Single video examples:
+# https://www.youtube.com/watch?v=dQw4w9WgXcQ
+# https://www.youtube.com/watch?v=jNQXAC9IVRw
+
+# You can add your URLs here
