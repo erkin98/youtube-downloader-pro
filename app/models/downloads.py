@@ -77,7 +77,7 @@ class Download(Base):
     extract_audio: Mapped[bool] = mapped_column(Boolean, default=False)
     include_subtitles: Mapped[bool] = mapped_column(Boolean, default=False)
     auto_subtitles: Mapped[bool] = mapped_column(Boolean, default=False)
-    subtitle_languages: Mapped[Optional[str]] = mapped_column(JSON)
+    subtitle_languages: Mapped[Optional[List[str]]] = mapped_column(JSON)
     include_thumbnail: Mapped[bool] = mapped_column(Boolean, default=False)
     include_metadata: Mapped[bool] = mapped_column(Boolean, default=True)
 
@@ -127,7 +127,7 @@ class Download(Base):
     completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
 
     # Relationships
-    metadata: Mapped[Optional["VideoMetadata"]] = relationship(
+    video_metadata: Mapped[Optional["VideoMetadata"]] = relationship(
         "VideoMetadata",
         back_populates="download",
         uselist=False,
@@ -166,8 +166,8 @@ class VideoMetadata(Base):
     # Video details
     upload_date: Mapped[Optional[datetime]] = mapped_column(DateTime)
     release_date: Mapped[Optional[datetime]] = mapped_column(DateTime)
-    categories: Mapped[Optional[str]] = mapped_column(JSON)  # List of categories
-    tags: Mapped[Optional[str]] = mapped_column(JSON)  # List of tags
+    categories: Mapped[Optional[List[str]]] = mapped_column(JSON)  # List of categories
+    tags: Mapped[Optional[List[str]]] = mapped_column(JSON)  # List of tags
 
     # Technical details
     resolution: Mapped[Optional[str]] = mapped_column(String(20))
@@ -177,14 +177,14 @@ class VideoMetadata(Base):
 
     # Thumbnails
     thumbnail_url: Mapped[Optional[str]] = mapped_column(String(500))
-    thumbnails: Mapped[Optional[str]] = mapped_column(JSON)  # List of thumbnail info
+    thumbnails: Mapped[Optional[List[str]]] = mapped_column(JSON)  # List of thumbnail info
 
     # Additional metadata
     webpage_url: Mapped[Optional[str]] = mapped_column(String(500))
     original_url: Mapped[Optional[str]] = mapped_column(String(500))
 
     # Relationships
-    download: Mapped["Download"] = relationship("Download", back_populates="metadata")
+    download: Mapped["Download"] = relationship("Download", back_populates="video_metadata")
 
 
 class DownloadFile(Base):

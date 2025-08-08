@@ -112,7 +112,7 @@ async def create_download(
                 thumbnail_url=video_info.get("thumbnail"),
                 webpage_url=video_info.get("webpage_url"),
             )
-            download.metadata = metadata
+            download.video_metadata = metadata
             download.title = video_info.get("title")
             download.description = video_info.get("description")
 
@@ -204,7 +204,7 @@ async def list_downloads(
     pages = math.ceil(total / per_page)
 
     return DownloadListResponse(
-        items=[DownloadResponse.from_orm(download) for download in downloads],
+        items=[DownloadResponse.model_validate(download, from_attributes=True) for download in downloads],
         total=total,
         page=page,
         per_page=per_page,
@@ -495,7 +495,7 @@ async def _get_download_with_relations(
 
     result = await db.execute(
         select(Download)
-        .options(selectinload(Download.metadata), selectinload(Download.files))
+        .options(selectinload(Download.video_metadata), selectinload(Download.files))
         .where(Download.id == download_id)
     )
     download = result.scalar_one_or_none()
@@ -503,4 +503,4 @@ async def _get_download_with_relations(
     if not download:
         return None
 
-    return DownloadResponse.from_orm(download)
+    return DownloadResponse.model_validate(download, from_attributes=True)

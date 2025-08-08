@@ -6,7 +6,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field, HttpUrl, validator
+from pydantic import BaseModel, Field, HttpUrl, field_validator
 
 from app.models.downloads import DownloadStatus, DownloadType, VideoQuality
 
@@ -99,20 +99,16 @@ class DownloadCreate(BaseModel):
     # Output directory
     output_directory: str = Field(default="downloads", description="Output directory")
 
-    @validator("playlist_end")
+    @field_validator("playlist_end")
     def validate_playlist_range(cls, v, values):
-        if (
-            v is not None
-            and "playlist_start" in values
-            and values["playlist_start"] is not None
-        ):
-            if v < values["playlist_start"]:
-                raise ValueError(
-                    "playlist_end must be greater than or equal to playlist_start"
-                )
+        playlist_start = values.get("playlist_start") if isinstance(values, dict) else None
+        if v is not None and playlist_start is not None and v < playlist_start:
+            raise ValueError(
+                "playlist_end must be greater than or equal to playlist_start"
+            )
         return v
 
-    @validator("subtitle_languages")
+    @field_validator("subtitle_languages")
     def validate_subtitle_languages(cls, v):
         if len(v) == 0:
             return ["en"]

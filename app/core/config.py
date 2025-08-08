@@ -5,7 +5,8 @@ Application configuration management
 import os
 from typing import List, Optional
 
-from pydantic import BaseSettings, validator
+from pydantic import field_validator
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -73,13 +74,13 @@ class Settings(BaseSettings):
     AWS_REGION: str = "us-east-1"
     S3_BUCKET: Optional[str] = None
 
-    @validator("ALLOWED_ORIGINS", pre=True)
+    @field_validator("ALLOWED_ORIGINS", mode="before")
     def parse_origins(cls, v):
         if isinstance(v, str):
             return [i.strip() for i in v.split(",")]
         return v
 
-    @validator("SECRET_KEY")
+    @field_validator("SECRET_KEY")
     def validate_secret_key(cls, v):
         if v == "your-secret-key-change-in-production":
             if os.getenv("ENVIRONMENT", "development") == "production":

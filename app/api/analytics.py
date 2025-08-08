@@ -181,13 +181,15 @@ async def get_downloads_timeline(
 
     # Determine date truncation based on interval
     if interval == "hour":
-        date_trunc = func.date_trunc("hour", Download.created_at)
+        # SQLite compatible hour bucket
+        date_trunc = func.strftime("%Y-%m-%d %H:00:00", Download.created_at)
         delta = timedelta(hours=1)
     elif interval == "day":
-        date_trunc = func.date_trunc("day", Download.created_at)
+        date_trunc = func.strftime("%Y-%m-%d 00:00:00", Download.created_at)
         delta = timedelta(days=1)
     else:  # week
-        date_trunc = func.date_trunc("week", Download.created_at)
+        # Approximate week bucket start (Monday) in SQLite by strftime of ISO week and year
+        date_trunc = func.strftime("%Y-W%W", Download.created_at)
         delta = timedelta(weeks=1)
 
     # Get download counts by time period and status
@@ -313,7 +315,7 @@ async def get_error_summary(
     # Get error trends over time
     daily_errors = await db.execute(
         select(
-            func.date_trunc("day", Download.created_at).label("date"),
+            func.strftime("%Y-%m-%d", Download.created_at).label("date"),
             func.count(Download.id).label("count"),
         )
         .where(
@@ -322,8 +324,8 @@ async def get_error_summary(
                 Download.created_at >= start_date,
             )
         )
-        .group_by(func.date_trunc("day", Download.created_at))
-        .order_by(func.date_trunc("day", Download.created_at))
+        .group_by(func.strftime("%Y-%m-%d", Download.created_at))
+        .order_by(func.strftime("%Y-%m-%d", Download.created_at))
     )
 
     error_timeline = [
@@ -371,12 +373,12 @@ async def get_usage_patterns(
     # Downloads by hour of day
     hourly_pattern = await db.execute(
         select(
-            func.extract("hour", Download.created_at).label("hour"),
+            func.cast(func.strftime("%H", Download.created_at), Integer).label("hour"),
             func.count(Download.id).label("count"),
         )
         .where(Download.created_at >= start_date)
-        .group_by(func.extract("hour", Download.created_at))
-        .order_by(func.extract("hour", Download.created_at))
+        .group_by(func.strftime("%H", Download.created_at))
+        .order_by(func.strftime("%H", Download.created_at))
     )
 
     hourly_data = [
@@ -386,12 +388,12 @@ async def get_usage_patterns(
     # Downloads by day of week
     daily_pattern = await db.execute(
         select(
-            func.extract("dow", Download.created_at).label("dow"),
+            func.cast(func.strftime("%w", Download.created_at), Integer).label("dow"),
             func.count(Download.id).label("count"),
         )
         .where(Download.created_at >= start_date)
-        .group_by(func.extract("dow", Download.created_at))
-        .order_by(func.extract("dow", Download.created_at))
+        .group_by(func.strftime("%w", Download.created_at))
+        .order_by(func.strftime("%w", Download.created_at))
     )
 
     day_names = [
@@ -423,8 +425,7 @@ async def get_usage_patterns(
     avg_processing_time = await db.scalar(
         select(
             func.avg(
-                func.extract("epoch", Download.completed_at)
-                - func.extract("epoch", Download.started_at)
+                func.strftime('%s', Download.completed_at) - func.strftime('%s', Download.started_at)
             )
         ).where(
             and_(

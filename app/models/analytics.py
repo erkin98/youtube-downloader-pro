@@ -4,7 +4,7 @@ Analytics models for YouTube Downloader Pro
 
 from datetime import datetime
 from enum import Enum
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from sqlalchemy import JSON, Boolean, Column, DateTime
 from sqlalchemy import Enum as SQLEnum
@@ -37,7 +37,7 @@ class AnalyticsEvent(Base):
     # Event details
     event_type: Mapped[EventType] = mapped_column(SQLEnum(EventType), index=True)
     event_name: Mapped[str] = mapped_column(String(100), index=True)
-    event_data: Mapped[Optional[str]] = mapped_column(JSON)
+    event_data: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON)
 
     # User context
     user_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("users.id"))
@@ -80,7 +80,7 @@ class PerformanceMetrics(Base):
     component: Mapped[Optional[str]] = mapped_column(
         String(50)
     )  # e.g., 'database', 'redis', 'download'
-    additional_data: Mapped[Optional[str]] = mapped_column(JSON)
+    additional_data: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON)
 
     # Timestamp
     created_at: Mapped[datetime] = mapped_column(
@@ -158,8 +158,8 @@ class UsageStatistics(Base):
     disk_usage: Mapped[Optional[float]] = mapped_column(Float)
 
     # Quality metrics
-    popular_formats: Mapped[Optional[str]] = mapped_column(JSON)
-    popular_resolutions: Mapped[Optional[str]] = mapped_column(JSON)
+    popular_formats: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON)
+    popular_resolutions: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON)
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

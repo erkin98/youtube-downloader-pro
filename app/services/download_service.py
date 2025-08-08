@@ -188,7 +188,7 @@ class DownloadService(LoggerMixin):
 
     async def _execute_download(self, download_id: int, cmd: List[str]) -> bool:
         """Execute download command with progress tracking"""
-
+        process = None
         try:
             self.log_info(f"Executing command: {' '.join(cmd)}")
 

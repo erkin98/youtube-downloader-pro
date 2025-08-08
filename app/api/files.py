@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.logging_config import LoggerMixin
-from app.models.downloads import Download, DownloadFile
+from app.models.downloads import Download, DownloadFile, DownloadStatus
 
 router = APIRouter()
 
@@ -44,7 +44,7 @@ async def download_file(
     if not download:
         raise HTTPException(status_code=404, detail="Download not found")
 
-    if download.status != "completed":
+    if download.status != DownloadStatus.COMPLETED:
         raise HTTPException(status_code=400, detail="Download not completed")
 
     # Get file based on type
@@ -95,7 +95,7 @@ async def stream_file(download_id: int, db: AsyncSession = Depends(get_db)):
     if not download:
         raise HTTPException(status_code=404, detail="Download not found")
 
-    if download.status != "completed" or not download.file_path:
+    if download.status != DownloadStatus.COMPLETED or not download.file_path:
         raise HTTPException(status_code=400, detail="No streamable file available")
 
     file_path = Path(download.file_path)
